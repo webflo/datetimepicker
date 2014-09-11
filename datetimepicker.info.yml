@@ -1,0 +1,4 @@
+name: Datetimepicker
+description: Datetimepicker Widget
+core: 8.x
+type: module

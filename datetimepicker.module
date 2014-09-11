@@ -1,0 +1,32 @@
+<?php
+use Drupal\Component\Serialization\Json;
+
+/**
+ * @file
+ * DateTimePicker module.
+ */
+
+function datetimepicker_element_date_callback(&$element, $form, $form_state) {
+  $element['date']['#attributes']['data-datetimepicker-widget'] = TRUE;
+  $element['date']['#attributes']['data-datetimepicker-settings'] = Json::encode($element['#datetimepicker_settings']);
+}
+
+
+function datetimepicker_element_time_callback(&$element, $form, $form_state) {
+  $settings = array(
+    'format' => 'd.m.Y',
+    'datepicker' => TRUE,
+    'timepicker' => FALSE,
+    'closeOnDateSelect' => TRUE,
+    ) + $element['#datetimepicker_settings'];
+  $element['date']['#attributes']['data-datetimepicker-widget'] = TRUE;
+  $element['date']['#attributes']['data-datetimepicker-settings'] = Json::encode($settings);
+
+  $settings = array(
+    'format' => 'H:i:00',
+    'datepicker' => FALSE,
+    'timepicker' => TRUE,
+    ) + $element['#datetimepicker_settings'];
+  $element['time']['#attributes']['data-datetimepicker-widget'] = TRUE;
+  $element['time']['#attributes']['data-datetimepicker-settings'] = Json::encode($settings);
+}

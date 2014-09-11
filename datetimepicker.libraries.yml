@@ -1,0 +1,10 @@
+datetimepicker:
+  version: VERSION
+  js:
+    vendor/datetimepicker/jquery.datetimepicker.js: {}
+  css:
+    library:
+      vendor/datetimepicker/jquery.datetimepicker.css: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
