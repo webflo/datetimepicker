@@ -3,7 +3,7 @@ datetimepicker:
   js:
     vendor/datetimepicker/jquery.datetimepicker.js: {}
   css:
-    library:
+    component:
       vendor/datetimepicker/jquery.datetimepicker.css: {}
   dependencies:
     - core/jquery
