@@ -7,11 +7,10 @@
 
 namespace Drupal\datetimepicker\Plugin\Field\FieldWidget;
 
-use Drupal\Component\Serialization\Json;
-use Drupal\config_translation\FormElement\DateFormat;
-use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\datetime\Plugin\Field\FieldWidget\DateTimeDefaultWidget;
 
 /**
@@ -28,13 +27,13 @@ use Drupal\datetime\Plugin\Field\FieldWidget\DateTimeDefaultWidget;
 class DateTimePicker extends DateTimeDefaultWidget {
 
   /**
-   * @var \Drupal\Core\Datetime\Date
+   * @var \Drupal\Core\Datetime\DateFormatter
    */
-  protected $dateService;
+  protected $dateFormatter;
 
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings) {
-    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings);
-    $this->dateService = \Drupal::service('date');
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, EntityStorageInterface $date_storage) {
+    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings, $date_storage);
+    $this->dateFormatter = \Drupal::service('date.formatter');
   }
 
   public static function defaultSettings() {
@@ -46,7 +45,7 @@ class DateTimePicker extends DateTimeDefaultWidget {
     return $settings;
   }
 
-  public function settingsForm(array $form, array &$form_state) {
+  public function settingsForm(array $form, FormStateInterface $form_state) {
     $form = parent::settingsForm($form, $form_state);
     $options = $this->dateFormatList();
 
@@ -67,7 +66,7 @@ class DateTimePicker extends DateTimeDefaultWidget {
     return $form;
   }
 
-  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, array &$form_state) {
+  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $element = parent::formElement($items, $delta, $element, $form, $form_state);
 
     $settings = array(
@@ -97,11 +96,11 @@ class DateTimePicker extends DateTimeDefaultWidget {
   }
 
   public function dateFormatList() {
-    $formats = entity_load_multiple('date_format');
+    $formats = $this->dateStorage->loadMultiple();
     $options = array('' => 'None');
 
     foreach ($formats as $entity) {
-      $options[$entity->id()] = $entity->label() . ' / ' . $this->dateService->format(REQUEST_TIME, $entity->id());
+      $options[$entity->id()] = $entity->label() . ' / ' . $this->dateFormatter->format(REQUEST_TIME, $entity->id());
     }
     return $options;
   }
@@ -111,8 +110,11 @@ class DateTimePicker extends DateTimeDefaultWidget {
       return '';
     }
 
+    /**
+     * @var \Drupal\Core\Datetime\DateFormatInterface $entity
+     */
     $entity = $this->dateStorage->load($format);
-    $value = $entity->getPattern(DrupalDateTime::PHP);
+    $value = $entity->getPattern();
     return $value;
   }
 
