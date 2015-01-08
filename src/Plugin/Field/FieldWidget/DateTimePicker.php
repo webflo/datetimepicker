@@ -77,8 +77,7 @@ class DateTimePicker extends DateTimeDefaultWidget {
     $element['value']['#date_date_format'] = $this->getPattern($this->getSetting('date_format'));
     $element['value']['#date_time_format'] = $this->getPattern($this->getSetting('time_format'));
 
-    $element['value']['#attached']['library'][] = 'datetimepicker/datetimepicker';
-    $element['value']['#attached']['js'][] = drupal_get_path('module', 'datetimepicker') . '/js/datetimepicker.widget.js';
+    $element['value']['#attached']['library'][] = 'datetimepicker/datetimepicker.widget';
     $element['value']['#datetimepicker_settings'] = $settings;
 
     if ($settings['timepicker'] == FALSE) {

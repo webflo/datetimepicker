@@ -8,3 +8,10 @@ datetimepicker:
   dependencies:
     - core/jquery
     - core/drupal
+
+datetimepicker.widget:
+  version: VERSION
+  js:
+    js/datetimepicker.widget.js: {}
+  dependencies:
+    - datetimepicker/datetimepicker
