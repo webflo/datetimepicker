@@ -12,9 +12,13 @@
 </style>
 </head>
 <body>
+	
 	<p><a href="http://xdsoft.net/jqplugins/datetimepicker/">Homepage</a></p>
 	<h3>DateTimePicker</h3>
 	<input type="text" value="" id="datetimepicker"/><br><br>
+  <h3>DateTimePickers selected by class</h3>
+	<input type="text" class="some_class" value="" id="some_class_1"/>
+	<input type="text" class="some_class" value="" id="some_class_2"/>
 	<h3>Mask DateTimePicker</h3>
 	<input type="text" value="" id="datetimepicker_mask"/><br><br>
 	<h3>TimePicker</h3>
@@ -22,6 +26,7 @@
 	<h3>DatePicker</h3>
 	<input type="text" id="datetimepicker2"/><br><br>
 	<h3>Inline DateTimePicker</h3>
+	<!--<div id="console" style="background-color:#fff;color:red">sdfdsfsdf</div>-->
 	<input type="text" id="datetimepicker3"/><input type="button" onclick="$('#datetimepicker3').datetimepicker({value:'2011/12/11 12:00'})" value="set inline value 2011/12/11 12:00"/><br><br>
 	<h3>Button Trigger</h3>
 	<input type="text" value="2013/12/03 18:00" id="datetimepicker4"/><input id="open" type="button" value="open"/><input id="close" type="button" value="close"/><input id="reset" type="button" value="reset"/>
@@ -49,22 +54,33 @@
 	<h3>Custom Date Styling</h3>
 	<p>Make the background of the date 2 days from now bright red.</p>
 	<input type="text" id="datetimepicker12"/>
+	<h3>Dark theme</h3>
+	<p>thank for this <a href="https://github.com/lampslave">https://github.com/lampslave</a></p>
+	<input type="text" id="datetimepicker_dark"/>
 </body>
 <script src="./jquery.js"></script>
 <script src="./jquery.datetimepicker.js"></script>
-<script>
+<script>/*
+window.onerror = function(errorMsg) {
+	$('#console').html($('#console').html()+'<br>'+errorMsg)
+}*/
 $('#datetimepicker').datetimepicker({
 dayOfWeekStart : 1,
-lang:'ru',
+lang:'en',
+disabledDates:['1986/01/08','1986/01/09','1986/01/10'],
 startDate:	'1986/01/05'
 });
 $('#datetimepicker').datetimepicker({value:'2015/04/15 05:03',step:10});
 
+$('.some_class').datetimepicker();
+
 $('#default_datetimepicker').datetimepicker({
 	formatTime:'H:i',
 	formatDate:'d.m.Y',
-	defaultDate:'8.12.1986', // it's my birthday
-	defaultTime:'10:00'
+	//defaultDate:'8.12.1986', // it's my birthday
+	defaultDate:'+03.01.1970', // it's my birthday
+	defaultTime:'10:00',
+	timepickerScrollbar:false
 });
 
 $('#datetimepicker10').datetimepicker({
@@ -118,7 +134,7 @@ $('#destroy').click(function(){
 	}
 });
 var logic = function( currentDateTime ){
-	if( currentDateTime.getDay()==6 ){
+	if (currentDateTime && currentDateTime.getDay() == 6){
 		this.setOptions({
 			minTime:'11:00'
 		});
@@ -168,5 +184,8 @@ $('#datetimepicker12').datetimepicker({
 		return [true, ""];
 	}
 });
+$('#datetimepicker_dark').datetimepicker({theme:'dark'})
+
+
 </script>
 </html>
