@@ -56,12 +56,14 @@ class DateTimePicker extends DateTimeDefaultWidget {
       '#default_value' => $this->getSetting('date_format'),
     );
 
-    $form['time_format'] = array(
-      '#title' => $this->t('Time'),
-      '#type' => 'select',
-      '#options' => $options,
-      '#default_value' => $this->getSetting('time_format'),
-    );
+    if($this->getFieldSetting('datetime_type') == 'datetime') {
+      $form['time_format'] = array(
+        '#title' => $this->t('Time'),
+        '#type' => 'select',
+        '#options' => $options,
+        '#default_value' => $this->getSetting('time_format'),
+      );
+    }
 
     return $form;
   }
