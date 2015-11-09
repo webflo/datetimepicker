@@ -14,7 +14,7 @@ function datetimepicker_element_date_callback(&$element, $form, $form_state) {
 
 function datetimepicker_element_time_callback(&$element, $form, $form_state) {
   $settings = array(
-    'format' => 'd.m.Y',
+    'format' => $element['#date_date_format'],
     'datepicker' => TRUE,
     'timepicker' => FALSE,
     'closeOnDateSelect' => TRUE,
@@ -23,7 +23,7 @@ function datetimepicker_element_time_callback(&$element, $form, $form_state) {
   $element['date']['#attributes']['data-datetimepicker-settings'] = Json::encode($settings);
 
   $settings = array(
-    'format' => 'H:i:00',
+    'format' => $element['#date_time_format'],
     'datepicker' => FALSE,
     'timepicker' => TRUE,
     ) + $element['#datetimepicker_settings'];
