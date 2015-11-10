@@ -14,10 +14,10 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\datetime\Plugin\Field\FieldWidget\DateTimeDefaultWidget;
 
 /**
- * Plugin implementation of the 'datetimepicker_default' widget.
+ * Plugin implementation of the 'datetimepicker' widget.
  *
  * @FieldWidget(
- *   id = "datetimepicker_default",
+ *   id = "datetimepicker",
  *   label = @Translation("DateTimePicker"),
  *   field_types = {
  *     "datetime"

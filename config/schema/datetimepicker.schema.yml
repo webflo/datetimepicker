@@ -1,0 +1,12 @@
+# Schema for the configuration files of the Datetime module.
+
+field.widget.settings.datetimepicker:
+  type: mapping
+  label: 'Datetimepicker display format settings'
+  mapping:
+    date_format:
+      type: string
+      label: 'Date'
+    time_format:
+      type: string
+      label: 'Time'
