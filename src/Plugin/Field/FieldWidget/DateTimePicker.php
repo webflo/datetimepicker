@@ -84,13 +84,13 @@ class DateTimePicker extends DateTimeDefaultWidget {
 
     if ($settings['timepicker'] == FALSE) {
       $element['value']['#date_date_callbacks'][] = 'datetimepicker_element_date_callback';
-      $element['value']['#date_date_element'] = 'custom';
+      $element['value']['#date_date_element'] = 'text';
       $element['value']['#date_time_element'] = 'none';
     }
     else {
       $element['value']['#date_time_callbacks'][] = 'datetimepicker_element_time_callback';
-      $element['value']['#date_date_element'] = 'custom';
-      $element['value']['#date_time_element'] = 'custom';
+      $element['value']['#date_date_element'] = 'text';
+      $element['value']['#date_time_element'] = 'text';
     }
 
     return $element;
