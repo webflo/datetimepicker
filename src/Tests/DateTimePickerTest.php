@@ -76,7 +76,7 @@ class DateTimePickerTest extends WebTestBase {
   /**
    * Tests DateTimePicker widget with Date only.
    */
-  function _testDatePickerWidget() {
+  function testDatePickerWidget() {
 
     $field_name = $this->fieldStorage->getName();
 
@@ -124,20 +124,6 @@ class DateTimePickerTest extends WebTestBase {
     $this->fieldStorage->setSetting('datetime_type', 'datetime');
     $this->fieldStorage->save();
 
-    $date_format_date = DateFormat::create([
-      'id' => 'datetimepicker_date',
-      'label' => 'Date',
-      'pattern' => 'dmY'
-    ]);
-    $date_format_date->save();
-
-    $date_format_time = DateFormat::create([
-      'id' => 'datetimepicker_time',
-      'label' => 'Time',
-      'pattern' => 'HHMM'
-    ]);
-    $date_format_date->save();
-
     // Change the widget to a datetimepicker widget.
     entity_get_form_display($this->field->getTargetEntityTypeId(), $this->field->getTargetBundle(), 'default')
       ->setComponent($field_name, array(
@@ -181,21 +167,18 @@ class DateTimePickerTest extends WebTestBase {
     $xpathIncrTime = "//select[starts-with(@id, \"edit-fields-$field_name-settings-edit-form-settings-time-format\")]";
     $this->assertFieldByXPath($xpathIncrTime, NULL, 'Time element found for Date and time.');
 
-    // Test the widget for validation notifications.
-    foreach ($this->datelistDataProvider() as $date_value) {
+    // Display creation form.
+    $this->drupalGet('entity_test/add');
 
-      // Display creation form.
-      $this->drupalGet('entity_test/add');
+    // Submit a partial date and ensure and error message is provided.
+    $edit = array(
+      "{$field_name}[0][value][date]" => '',
+      "{$field_name}[0][value][time]" => '12:00:00',
+    );
 
-      // Submit a partial date and ensure and error message is provided.
-      $edit = array();
-      foreach ($date_value as $part => $value) {
-        $edit["{$field_name}[0][value][$part]"] = $value;
-      }
-
-      $this->drupalPostForm(NULL, $edit, t('Save'));
-      $this->assertResponse(200);
-    }
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->assertResponse(200);
+    $this->assertText('Please enter a date in the format');
 
     // Test the widget for complete input with zeros as part of selections.
     $this->drupalGet('entity_test/add');
@@ -208,21 +191,49 @@ class DateTimePickerTest extends WebTestBase {
 
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertResponse(200);
-  }
 
-  /**
-   * The data provider for testing the validation of the datetimepicker widget.
-   *
-   * @return array
-   *   An array of datelist input permutations to test.
-   */
-  protected function datelistDataProvider() {
-    return [
-      // Date only selected, validation error on Time.
-      ['date' => '2012-12-31', 'time' => ''],
-      // Time only selected, validation error on Date.
-      ['date' => '', 'time' => '12:00:00'],
-    ];
+    $date_format_date = DateFormat::create([
+      'id' => 'datetimepicker_date',
+      'label' => 'Date',
+      'pattern' => 'dmY'
+    ]);
+    $date_format_date->save();
+
+    $date_format_time = DateFormat::create([
+      'id' => 'datetimepicker_time',
+      'label' => 'Time',
+      'pattern' => 'HHMM'
+    ]);
+    $date_format_time->save();
+
+    // Change the widget to a datetimepicker widget.
+    entity_get_form_display($this->field->getTargetEntityTypeId(), $this->field->getTargetBundle(), 'default')
+      ->setComponent($field_name, array(
+        'type' => 'datetimepicker',
+        'settings' => array(
+          'date_format' => 'datetimepicker_date',
+          'time_format' => 'datetimepicker_time',
+        ),
+      ))
+      ->save();
+    \Drupal::entityManager()->clearCachedFieldDefinitions();
+
+    // Ensure field is set to a date and time field.
+    $this->fieldStorage->setSetting('datetime_type', 'datetime');
+    $this->fieldStorage->save();
+
+    // Test the widget for wrong inputformat.
+    $this->drupalGet('entity_test/add');
+
+    $edit = array(
+      "{$field_name}[0][value][date]" => '2012/02/12',
+      "{$field_name}[0][value][time]" => '12:00:00',
+    );
+
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->assertResponse(200);
+    $this->assertText('The date is invalid.');
+
   }
 
 }
