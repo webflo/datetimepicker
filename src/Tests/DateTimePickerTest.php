@@ -232,7 +232,7 @@ class DateTimePickerTest extends WebTestBase {
 
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertResponse(200);
-    $this->assertText('The date is invalid.');
+    $this->assertText("The {$field_name} date is invalid.");
 
   }
 
