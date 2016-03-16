@@ -56,14 +56,12 @@ class DateTimePicker extends DateTimeDefaultWidget {
       '#default_value' => $this->getSetting('date_format'),
     );
 
-    if($this->getFieldSetting('datetime_type') == 'datetime') {
-      $form['time_format'] = array(
-        '#title' => $this->t('Time'),
-        '#type' => 'select',
-        '#options' => $options,
-        '#default_value' => $this->getSetting('time_format'),
-      );
-    }
+    $form['time_format'] = array(
+      '#title' => $this->t('Time'),
+      '#type' => 'select',
+      '#options' => $options,
+      '#default_value' => $this->getSetting('time_format'),
+    );
 
     return $form;
   }
@@ -71,10 +69,14 @@ class DateTimePicker extends DateTimeDefaultWidget {
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $element = parent::formElement($items, $delta, $element, $form, $form_state);
 
-    $settings = array(
+    $settings = [
       'timepicker' => (int) ($element['value']['#date_time_format'] == '') ? FALSE : TRUE,
-      'format' => trim($this->getPattern($this->getSetting('date_format')) . ' ' . $this->getPattern($this->getSetting('time_format'))),
-    );
+      'format' => $this->getPattern($this->getSetting('date_format')),
+    ];
+
+    if ($settings['timepicker'] == TRUE) {
+      $settings['format'] .= ' ' . $this->getPattern($this->getSetting('time_format'));
+    }
 
     $element['value']['#date_date_format'] = $this->getPattern($this->getSetting('date_format'));
     $element['value']['#date_time_format'] = $this->getPattern($this->getSetting('time_format'));
