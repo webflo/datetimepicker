@@ -20,7 +20,8 @@
         element_settings['dayOfWeekStart'] = 1;
 
         if (element_settings.hasOwnProperty('datetimepicker_group')) {
-          if (element_settings['datetimepicker_element'] == 'min') {
+          if (element_settings.datepicker && element_settings['datetimepicker_element'] == 'min') {
+            element.addClass('js-' + element_settings.datetimepicker_group + '-min');
             element_settings.onShow = function(ct) {
               var element_class = '.js-' + element_settings.datetimepicker_group + '-max';
               var date = jQuery(element_class).val() ? jQuery(element_class).val() : false;
@@ -29,7 +30,8 @@
               })
            };
           }
-          if (element_settings['datetimepicker_element'] == 'max') {
+          if (element_settings.datepicker && element_settings['datetimepicker_element'] == 'max') {
+            element.addClass('js-' + element_settings.datetimepicker_group + '-max');
             element_settings.onShow = function(ct) {
               var element_class = '.js-' + element_settings.datetimepicker_group + '-min';
               var date = jQuery(element_class).val() ? jQuery(element_class).val() : false;
@@ -37,6 +39,11 @@
                 minDate: date
               })
            };
+          }
+          if (element_settings.timepicker) {
+            element_settings.onSelectTime = function(current_time, input, event) {
+              input.val(input.val().substr(0,5) + ':00');
+            };
           }
         }
 
