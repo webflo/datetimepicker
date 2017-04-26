@@ -8,6 +8,7 @@
 namespace Drupal\datetimepicker\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\Crypt;
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\date_combo\Plugin\Field\FieldFormatter\DateComboDefaultFormatter;
@@ -88,9 +89,13 @@ class DateComboDateTimePicker extends DateComboDefaultWidget {
       'format' => $this->getPattern($this->getSetting('date_format')),
     ];
 
-    if ($settings['timepicker'] == TRUE) {
+    if ($settings['timepicker'] == TRUE && $this->getSetting('time_format') !== '') {
       $settings['format'] .= ' ' . $this->getPattern($this->getSetting('time_format'));
     }
+    else {
+      $settings['timepicker'] = FALSE;
+    }
+
 
     foreach (['value', 'value2'] as $name) {
       $element[$name]['#date_date_format'] = $this->getPattern($this->getSetting('date_format'));
@@ -119,6 +124,14 @@ class DateComboDateTimePicker extends DateComboDefaultWidget {
     $element['value2']['#datetimepicker_settings']['datetimepicker_element'] = 'max';
 
     return $element;
+  }
+
+  protected function massageDateValue(DrupalDateTime $date) {
+    if ($this->getSetting('time_format') === '') {
+      $date->setTimezone(new \DateTimezone(DATETIME_STORAGE_TIMEZONE));
+      $date->setTime(0, 0, 0);
+    }
+    return parent::massageDateValue($date);
   }
 
 }
