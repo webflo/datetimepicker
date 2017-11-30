@@ -1,0 +1,7 @@
+/**
+ * Override Drupal core ".container-inline div" from datetime-form.html.twig
+ */
+.xdsoft_datetimepicker div,
+.xdsoft_datetimepicker label {
+  display: block;
+}

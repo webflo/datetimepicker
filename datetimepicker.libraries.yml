@@ -13,5 +13,8 @@ datetimepicker.widget:
   version: VERSION
   js:
     js/datetimepicker.widget.js: {}
+  css:
+    component:
+      css/datetimepicker.widget.css: {}
   dependencies:
     - datetimepicker/datetimepicker
