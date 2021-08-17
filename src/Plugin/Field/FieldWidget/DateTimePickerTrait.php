@@ -9,8 +9,7 @@ trait DateTimePickerTrait {
     $options = array('' => 'None');
 
     foreach ($formats as $entity) {
-      $options[$entity->id()] = $entity->label() . ' / ' . $this->dateFormatter->format(REQUEST_TIME,
-          $entity->id());
+      $options[$entity->id()] = $entity->label() . ' / ' . $this->dateFormatter->format(\Drupal::time()->getRequestTime(), $entity->id());
     }
     return $options;
   }

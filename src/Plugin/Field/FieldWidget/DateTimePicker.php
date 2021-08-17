@@ -65,6 +65,10 @@ class DateTimePicker extends DateTimeDefaultWidget {
       '#default_value' => $this->getSetting('time_format'),
     );
 
+    if ($this->fieldDefinition->getSetting('datetime_type') === 'date') {
+      $form['time_format']['#access'] = FALSE;
+    }
+
     return $form;
   }
 

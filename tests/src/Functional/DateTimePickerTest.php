@@ -9,22 +9,30 @@ namespace Drupal\datetimepicker\Tests;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Datetime\Entity\DateFormat;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\simpletest\WebTestBase;
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests Datetimepicker widget functionality.
  *
  * @group datetimepicker
  */
-class DateTimePickerTest extends WebTestBase {
+class DateTimePickerTest extends BrowserTestBase {
 
   /**
    * Modules to enable.
    *
    * @var array
    */
-  public static $modules = array('node', 'entity_test', 'datetime', 'datetimepicker', 'field_ui');
+  protected static $modules = array('node', 'entity_test', 'datetime', 'datetimepicker', 'field_ui');
+
+  /**
+   * @var string
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * A field storage to use in this test class.
@@ -43,7 +51,7 @@ class DateTimePickerTest extends WebTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $web_user = $this->drupalCreateUser(array(
@@ -57,15 +65,15 @@ class DateTimePickerTest extends WebTestBase {
     $this->drupalLogin($web_user);
 
     // Create a field with settings to validate.
-    $field_name = Unicode::strtolower($this->randomMachineName());
-    $this->fieldStorage = entity_create('field_storage_config', array(
+    $field_name = mb_strtolower($this->randomMachineName());
+    $this->fieldStorage = FieldStorageConfig::create(array(
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
       'type' => 'datetime',
       'settings' => array('datetime_type' => 'date'),
     ));
     $this->fieldStorage->save();
-    $this->field = entity_create('field_config', array(
+    $this->field = FieldConfig::create(array(
       'field_storage' => $this->fieldStorage,
       'bundle' => 'entity_test',
       'required' => TRUE,
@@ -77,15 +85,16 @@ class DateTimePickerTest extends WebTestBase {
    * Tests DateTimePicker widget with Date only.
    */
   function testDatePickerWidget() {
-
     $field_name = $this->fieldStorage->getName();
+    $field_name_id = str_replace('_', '-', $field_name);
 
     // Ensure field is set to a date only field.
     $this->fieldStorage->setSetting('datetime_type', 'date');
     $this->fieldStorage->save();
 
     // Change the widget to a datelist widget.
-    entity_get_form_display($this->field->getTargetEntityTypeId(), $this->field->getTargetBundle(), 'default')
+    \Drupal::service('entity_display.repository')
+      ->getFormDisplay($this->field->getTargetEntityTypeId(), $this->field->getTargetBundle(), 'default')
       ->setComponent($field_name, array(
         'type' => 'datetimepicker',
         'settings' => array(
@@ -94,38 +103,39 @@ class DateTimePickerTest extends WebTestBase {
       ))
       ->save();
 
-    \Drupal::entityManager()->clearCachedFieldDefinitions();
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
     // Display creation form.
     $this->drupalGet('entity_test/add');
     // Assert that Hour and Minute Elements do not appear on Date Only
-    $this->assertNoFieldByXPath("//*[@id=\"edit-$field_name-0-value-time\"]", NULL, 'Time element not found on Date Only.');
+    $this->assertCount(0, $this->xpath("//*[@id=\"edit-$field_name-0-value-time\"]"));
 
     // Go to the form display page to assert that increment option does not appear on Date Only
     $fieldEditUrl = 'entity_test/structure/entity_test/form-display';
     $this->drupalGet($fieldEditUrl);
 
     // Click on the widget settings button to open the widget settings form.
-    $this->drupalPostAjaxForm(NULL, array(), $field_name . "_settings_edit");
-    $xpathIncrDate = "//select[starts-with(@id, \"edit-fields-$field_name-settings-edit-form-settings-date-format\")]";
-    $this->assertFieldByXPath($xpathIncrDate, NULL, 'Date element found for Date and time.');
-    $xpathIncrTime = "//select[starts-with(@id, \"edit-fields-$field_name-settings-edit-form-settings-time-format\")]";
-    $this->assertNoFieldByXPath($xpathIncrTime, NULL, 'Time element not found on Date Only.');
+    $this->click("[id^=edit-fields-$field_name_id-settings-edit]");
+    $xpathIncrDate = "//select[starts-with(@id, \"edit-fields-$field_name_id-settings-edit-form-settings-date-format\")]";
+    $this->assertCount(1, $this->xpath($xpathIncrDate));
+    $xpathIncrTime = "//select[starts-with(@id, \"edit-fields-$field_name_id-settings-edit-form-settings-time-format\")]";
+    $this->assertCount(0, $this->xpath($xpathIncrTime));
   }
 
   /**
    * Tests DateTimePicker widget with Date and Time.
    */
   function testDateTimePickerWidget() {
-
     $field_name = $this->fieldStorage->getName();
+    $field_name_id = str_replace('_', '-', $field_name);
 
     // Ensure field is set to a date & time field.
     $this->fieldStorage->setSetting('datetime_type', 'datetime');
     $this->fieldStorage->save();
 
     // Change the widget to a datetimepicker widget.
-    entity_get_form_display($this->field->getTargetEntityTypeId(), $this->field->getTargetBundle(), 'default')
+    \Drupal::service('entity_display.repository')
+      ->getFormDisplay($this->field->getTargetEntityTypeId(), $this->field->getTargetBundle(), 'default')
       ->setComponent($field_name, array(
         'type' => 'datetimepicker',
         'settings' => array(
@@ -134,38 +144,38 @@ class DateTimePickerTest extends WebTestBase {
         ),
       ))
       ->save();
-    \Drupal::entityManager()->clearCachedFieldDefinitions();
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
     // Display creation form.
     $this->drupalGet('entity_test/add');
 
-    $this->assertFieldByXPath("//*[@id=\"edit-$field_name-0-value-date\"]", NULL, 'Date element found.');
-    $this->assertFieldByXPath("//*[@id=\"edit-$field_name-0-value-time\"]", NULL, 'Time element found.');
+    $this->assertCount(1, $this->xpath("//*[@id=\"edit-$field_name-0-value-date\"]"), 'Date element found.');
+    $this->assertCount(1, $this->xpath("//*[@id=\"edit-$field_name-0-value-time\"]"), 'Time element found.');
 
     // Submit a valid date and ensure it is accepted.
     $value = '2012-12-31 00:00:00';
     $date = new DrupalDateTime($value, 'UTC');
-    $date_format = entity_load('date_format', 'html_date')->getPattern();
+    $date_format = DateFormat::load('html_date')->getPattern();
 
     $edit = array(
       "{$field_name}[0][value][date]" => $date->format($date_format),
       "{$field_name}[0][value][time]" => '12:00:00',
     );
 
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-    preg_match('|entity_test/manage/(\d+)|', $this->url, $match);
+    $this->submitForm($edit, t('Save'));
+    preg_match('|entity_test/manage/(\d+)|', $this->getUrl(), $match);
     $id = $match[1];
-    $this->assertText(t('entity_test @id has been created.', array('@id' => $id)));
+    $this->assertSession()->pageTextContains(t('entity_test @id has been created.', array('@id' => $id)));
     // Go to the form display page to assert that increment option does appear on Date Time
     $fieldEditUrl = 'entity_test/structure/entity_test/form-display';
     $this->drupalGet($fieldEditUrl);
 
     // Click on the widget settings button to open the widget settings form.
-    $this->drupalPostAjaxForm(NULL, array(), $field_name . "_settings_edit");
+    $this->click("[id^=edit-fields-$field_name_id-settings-edit]");
     $xpathIncrDate = "//select[starts-with(@id, \"edit-fields-$field_name-settings-edit-form-settings-date-format\")]";
-    $this->assertFieldByXPath($xpathIncrDate, NULL, 'Date element found for Date and time.');
+    $this->assertCount(1, $this->xpath($xpathIncrDate), 'Date element found for Date and time.');
     $xpathIncrTime = "//select[starts-with(@id, \"edit-fields-$field_name-settings-edit-form-settings-time-format\")]";
-    $this->assertFieldByXPath($xpathIncrTime, NULL, 'Time element found for Date and time.');
+    $this->assertCount(1, $this->xpath($xpathIncrTime), 'Time element found for Date and time.');
 
     // Display creation form.
     $this->drupalGet('entity_test/add');
@@ -176,9 +186,9 @@ class DateTimePickerTest extends WebTestBase {
       "{$field_name}[0][value][time]" => '12:00:00',
     );
 
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertResponse(200);
-    $this->assertText('Please enter a date in the format');
+    $this->submitForm($edit, t('Save'));
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->pageTextContains('Please enter a date in the format');
 
     // Test the widget for complete input with zeros as part of selections.
     $this->drupalGet('entity_test/add');
@@ -189,8 +199,8 @@ class DateTimePickerTest extends WebTestBase {
       $edit["{$field_name}[0][value][$part]"] = $value;
     }
 
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertResponse(200);
+    $this->submitForm($edit, t('Save'));
+    $this->assertSession()->statusCodeEquals(200);
 
     $date_format_date = DateFormat::create([
       'id' => 'datetimepicker_date',
@@ -207,7 +217,8 @@ class DateTimePickerTest extends WebTestBase {
     $date_format_time->save();
 
     // Change the widget to a datetimepicker widget.
-    entity_get_form_display($this->field->getTargetEntityTypeId(), $this->field->getTargetBundle(), 'default')
+    \Drupal::service('entity_display.repository')
+      ->getFormDisplay($this->field->getTargetEntityTypeId(), $this->field->getTargetBundle(), 'default')
       ->setComponent($field_name, array(
         'type' => 'datetimepicker',
         'settings' => array(
@@ -216,7 +227,7 @@ class DateTimePickerTest extends WebTestBase {
         ),
       ))
       ->save();
-    \Drupal::entityManager()->clearCachedFieldDefinitions();
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
     // Ensure field is set to a date and time field.
     $this->fieldStorage->setSetting('datetime_type', 'datetime');
@@ -230,10 +241,9 @@ class DateTimePickerTest extends WebTestBase {
       "{$field_name}[0][value][time]" => '12:00:00',
     );
 
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertResponse(200);
-    $this->assertText("The {$field_name} date is invalid.");
-
+    $this->submitForm( $edit, t('Save'));
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->pageTextContains("The date is invalid.");
   }
 
 }

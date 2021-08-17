@@ -13,6 +13,7 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\date_combo\Plugin\Field\FieldFormatter\DateComboDefaultFormatter;
 use Drupal\date_combo\Plugin\Field\FieldWidget\DateComboDefaultWidget;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
 /**
  * Plugin implementation of the 'datetimepicker_date_combo' widget.
@@ -128,7 +129,7 @@ class DateComboDateTimePicker extends DateComboDefaultWidget {
 
   protected function massageDateValue(DrupalDateTime $date) {
     if ($this->getSetting('time_format') === '') {
-      $date->setTimezone(new \DateTimezone(DATETIME_STORAGE_TIMEZONE));
+      $date->setTimezone(new \DateTimezone(DateTimeItemInterface::STORAGE_TIMEZONE));
       $date->setTime(0, 0, 0);
     }
     return parent::massageDateValue($date);
